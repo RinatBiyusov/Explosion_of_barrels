@@ -1,37 +1,29 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class Exploder : MonoBehaviour 
+public class Exploder : MonoBehaviour
 {
-    public static Exploder exploder { get; private set; }
+    [SerializeField] private float _explosionRadius = 100f;
+    [SerializeField] private float _explosionForce = 10f;
 
-    [SerializeField] private  float _explosionRadius = 100f;
-    [SerializeField] private  float _explosionForce = 10f;
-
-    private void Awake()
-    {
-        if (exploder != null && exploder != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        exploder = this;
-
-        DontDestroyOnLoad(gameObject);
-    }
-
-    public void Explode(GameObject gameObject)
+    public void ExplodeWhenNotSplitted(GameObject cube)
     {
         foreach (Rigidbody explodableObject in GetExplodableObjects(gameObject))
             explodableObject.AddExplosionForce(_explosionForce, explodableObject.transform.position, _explosionRadius);
     }
 
-    private List<Rigidbody> GetExplodableObjects(GameObject gameObject)
+    public void ExplodeWhenSplitted(List<Rigidbody> cubes)
+    {
+        foreach (Rigidbody explodableObject in cubes)
+            explodableObject.AddExplosionForce(_explosionForce, explodableObject.transform.position, _explosionRadius);
+    }
+
+    private List<Rigidbody> GetExplodableObjects(GameObject cube)
     {
         Collider[] hits = Physics.OverlapSphere(gameObject.transform.position, _explosionRadius);
 
-        List<Rigidbody> cubes = new();
+        List<Rigidbody> cubes = new List<Rigidbody>();
 
         foreach (Collider hit in hits)
             if (hit.attachedRigidbody != null)
