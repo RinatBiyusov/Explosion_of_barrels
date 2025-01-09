@@ -1,68 +1,58 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(ColorChanger), typeof(Cube))]
+[RequireComponent(typeof(Cube))]
 
 public class Spawner : MonoBehaviour
 {
-    [SerializeField] private Cube _cubePrefab;
+    [SerializeField] private Exploder _exploder;
+    [SerializeField] private Cube _cubeReference;
 
-    private Cube _cubeReference;
-    private List<Cube> _activeCubes = new List<Cube>();
     private readonly int _minRangeRandom = 2;
     private readonly int _maxRangeRandom = 6;
     private float _sizeReductionRatio = 2;
+    private List<Cube> _listActiveCubes = new List<Cube>();
 
-    private void RegisterCube(Cube cube)
+    private void Awake()
     {
-        cube.Splitting += Split;
-        _activeCubes.Add(cube);
+        _exploder = GetComponent<Exploder>();
     }
 
-    private void UnregisterCube(Cube cube)
+    private void OnEnable()
     {
-        cube.Splitting -= Split;
-        _activeCubes.Remove(cube);
+        _cubeReference.Splitting += Split;
     }
 
-    private void Split(Cube cube, Exploder exploder)
+    private void Split(Cube cube)
     {
         int clones = Random.Range(_minRangeRandom, _maxRangeRandom);
-        Cube duplicatedObject = new Cube();
+        Cube duplicatedObject;
         List<Rigidbody> duplicatedObjects = new List<Rigidbody>();
+
+        cube.Splitting -= Split;
 
         for (int i = 0; i < clones; i++)
         {
             duplicatedObject = CreateCube(cube);
 
-            //duplicatedObject = Instantiate(_cubePrefab, cube.transform.position, Quaternion.identity);
-            //duplicatedObject.transform.localScale /= _sizeReductionRatio;
-            //_colorChanger.ChangeColor(duplicatedObject.GetComponent<MeshRenderer>());
-
-            //RegisterCube(duplicatedObject);
+            duplicatedObject.Splitting += Split;
 
             duplicatedObjects.Add(duplicatedObject.GetComponent<Rigidbody>());
         }
 
-        exploder.ExplodeWhenSplitted(duplicatedObjects);
+        _exploder.ExplodeWhenSplitted(duplicatedObjects);
 
-        UnregisterCube(cube);
+       cube.Splitting -= Split;
     }
 
     private Cube CreateCube(Cube sourceCube)
     {
         Vector3 newScale = sourceCube.transform.localScale / _sizeReductionRatio;
 
-        Cube newCube = Instantiate(_cubePrefab, sourceCube.transform.position, Random.rotation);
+        Cube newCube = Instantiate(sourceCube, sourceCube.transform.position, Random.rotation);
 
-        newCube.Init(newScale);
+        newCube.Init(newScale, newCube);
 
-        RegisterCube(newCube);
         return newCube;
     }
-
 }
-
-// Передать спавнеру exploder, чтобы он сделал взрыв, и получал взрыватель только тогда когда нужно [+]
-// Создать корзину для всех кубов внутри спавнера (Изучить как сделано у чувак с инопланетяненом)
-// Разобраться почему теряется ссылка, и имеет ли gameobject все компоненты, которые у него есть (можно, взависимости от их модификатора допуска)

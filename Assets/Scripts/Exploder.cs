@@ -4,13 +4,17 @@ using UnityEngine;
 
 public class Exploder : MonoBehaviour
 {
-    [SerializeField] private float _explosionRadius = 100f;
-    [SerializeField] private float _explosionForce = 10f;
+    private float _explosionRadius = 50f;
+    private float _explosionForce = 100f;
 
-    public void ExplodeWhenNotSplitted(GameObject cube)
+    public void ExplodeWhenNotSplitted(Vector3 positon)
     {
-        foreach (Rigidbody explodableObject in GetExplodableObjects(gameObject))
-            explodableObject.AddExplosionForce(_explosionForce, explodableObject.transform.position, _explosionRadius);
+        foreach (Cube cube in GetExplodableObjects(positon))
+        {
+            float force = _explosionForce;
+
+            cube.AddExplosion(force, positon, _explosionRadius);
+        }
     }
 
     public void ExplodeWhenSplitted(List<Rigidbody> cubes)
@@ -19,15 +23,15 @@ public class Exploder : MonoBehaviour
             explodableObject.AddExplosionForce(_explosionForce, explodableObject.transform.position, _explosionRadius);
     }
 
-    private List<Rigidbody> GetExplodableObjects(GameObject cube)
+    private List<Cube> GetExplodableObjects(Vector3 position)
     {
-        Collider[] hits = Physics.OverlapSphere(gameObject.transform.position, _explosionRadius);
+        Collider[] hits = Physics.OverlapSphere(position, _explosionRadius);
 
-        List<Rigidbody> cubes = new List<Rigidbody>();
+        List<Cube> cubes = new List<Cube>();
 
-        foreach (Collider hit in hits)
-            if (hit.attachedRigidbody != null)
-                cubes.Add(hit.attachedRigidbody);
+        foreach (Collider collider in hits)
+            if (collider.TryGetComponent<Cube>(out Cube cube))
+                cubes.Add(cube);
 
         return cubes;
     }
