@@ -1,16 +1,15 @@
 using UnityEngine;
 using System;
-using UnityEngine.UIElements;
 
-[RequireComponent(typeof(Exploder), typeof(ColorChanger))]
-
+[RequireComponent(typeof(Exploder), typeof(ColorChanger), typeof(Rigidbody))]
 public class Cube : MonoBehaviour
 {
     [SerializeField] private float _currentSplitChance = 1;
     private Exploder _exploder;
     private ColorChanger _colorChanger;
     private float _probabilityReductionSplit = 2;
-    private Rigidbody _rigidbody;
+
+    public Rigidbody Rigidbody { get; private set; }
 
     public event Action<Cube> Splitting;
 
@@ -18,7 +17,7 @@ public class Cube : MonoBehaviour
     {
         _exploder = GetComponent<Exploder>();
         _colorChanger = GetComponent<ColorChanger>();
-        _rigidbody = GetComponent<Rigidbody>();
+        Rigidbody = GetComponent<Rigidbody>();
     }
 
     private void OnMouseDown()
@@ -31,7 +30,7 @@ public class Cube : MonoBehaviour
         }
         else
         {
-            _exploder.ExplodeWhenNotSplitted(transform.position);
+            _exploder.Explode(transform.position);
         }
 
         Destroy(gameObject);
@@ -47,7 +46,7 @@ public class Cube : MonoBehaviour
         float adjustedForce = baseForce * sizeFactor * forceMultiplier;
         float adjustedRadius = baseRadius * sizeFactor * forceMultiplier;
 
-        _rigidbody.AddExplosionForce(adjustedForce, center, adjustedRadius, upwardsModifier, ForceMode.Impulse);
+        Rigidbody.AddExplosionForce(adjustedForce, center, adjustedRadius, upwardsModifier, ForceMode.Impulse);
     }
 
     public void Init(Vector3 scale, Cube sourceCube)

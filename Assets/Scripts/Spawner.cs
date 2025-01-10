@@ -2,16 +2,14 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Cube))]
-
 public class Spawner : MonoBehaviour
 {
     [SerializeField] private Exploder _exploder;
     [SerializeField] private Cube _cubeReference;
 
-    private readonly int _minRangeRandom = 2;
-    private readonly int _maxRangeRandom = 6;
+    private readonly int _minCreatedCubes = 2;
+    private readonly int _maxCreatedCubes = 6;
     private float _sizeReductionRatio = 2;
-    private List<Cube> _listActiveCubes = new List<Cube>();
 
     private void Awake()
     {
@@ -25,9 +23,9 @@ public class Spawner : MonoBehaviour
 
     private void Split(Cube cube)
     {
-        int clones = Random.Range(_minRangeRandom, _maxRangeRandom);
+        int clones = Random.Range(_minCreatedCubes, _maxCreatedCubes + 1);
         Cube duplicatedObject;
-        List<Rigidbody> duplicatedObjects = new List<Rigidbody>();
+        List<Cube> duplicatedObjects = new List<Cube>();
 
         cube.Splitting -= Split;
 
@@ -37,7 +35,7 @@ public class Spawner : MonoBehaviour
 
             duplicatedObject.Splitting += Split;
 
-            duplicatedObjects.Add(duplicatedObject.GetComponent<Rigidbody>());
+            duplicatedObjects.Add(duplicatedObject);
         }
 
         _exploder.ExplodeWhenSplitted(duplicatedObjects);

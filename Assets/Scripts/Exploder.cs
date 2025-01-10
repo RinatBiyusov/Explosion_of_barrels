@@ -7,7 +7,7 @@ public class Exploder : MonoBehaviour
     private float _explosionRadius = 50f;
     private float _explosionForce = 100f;
 
-    public void ExplodeWhenNotSplitted(Vector3 positon)
+    public void Explode(Vector3 positon)
     {
         foreach (Cube cube in GetExplodableObjects(positon))
         {
@@ -17,10 +17,10 @@ public class Exploder : MonoBehaviour
         }
     }
 
-    public void ExplodeWhenSplitted(List<Rigidbody> cubes)
+    public void ExplodeWhenSplitted(List<Cube> cubes)
     {
-        foreach (Rigidbody explodableObject in cubes)
-            explodableObject.AddExplosionForce(_explosionForce, explodableObject.transform.position, _explosionRadius);
+        foreach (Cube explodableObject in cubes)
+            explodableObject.Rigidbody.AddExplosionForce(_explosionForce, explodableObject.transform.position, _explosionRadius);
     }
 
     private List<Cube> GetExplodableObjects(Vector3 position)
