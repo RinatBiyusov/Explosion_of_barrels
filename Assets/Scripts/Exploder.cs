@@ -9,11 +9,17 @@ public class Exploder : MonoBehaviour
 
     public void Explode(Vector3 positon)
     {
+        float upwardsModifier = 0.1f;
+        int forceMultiplier = 3;
+        float force = _explosionForce;
+
         foreach (Cube cube in GetExplodableObjects(positon))
         {
-            float force = _explosionForce;
+            float sizeFactor = 1f / transform.localScale.magnitude;
+            float adjustedForce = _explosionForce * sizeFactor * forceMultiplier;
+            float adjustedRadius = _explosionRadius * sizeFactor * forceMultiplier;
 
-            cube.AddExplosion(force, positon, _explosionRadius);
+            cube.Rigidbody.AddExplosionForce(adjustedForce, positon, adjustedRadius, upwardsModifier, ForceMode.Impulse);
         }
     }
 

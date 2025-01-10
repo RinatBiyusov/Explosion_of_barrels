@@ -5,18 +5,25 @@ using System;
 public class Cube : MonoBehaviour
 {
     [SerializeField] private float _currentSplitChance = 1;
-    private Exploder _exploder;
     private ColorChanger _colorChanger;
     private float _probabilityReductionSplit = 2;
 
+    public Exploder Exploder {  get; private set; }
     public Rigidbody Rigidbody { get; private set; }
 
     public event Action<Cube> Splitting;
 
+    public void Init(Vector3 scale, Cube sourceCube)
+    {
+        transform.localScale = scale;
+        _colorChanger.ChangeColor(sourceCube.GetComponent<MeshRenderer>());
+        UpdateSplitChance(sourceCube._currentSplitChance);
+    }
+
     private void Awake()
     {
-        _exploder = GetComponent<Exploder>();
         _colorChanger = GetComponent<ColorChanger>();
+        Exploder = GetComponent<Exploder>();
         Rigidbody = GetComponent<Rigidbody>();
     }
 
@@ -27,38 +34,14 @@ public class Cube : MonoBehaviour
         if (_currentSplitChance >= random)
         {
             Splitting?.Invoke(this);
+            Debug.Log(_currentSplitChance);
         }
         else
         {
-            _exploder.Explode(transform.position);
+            Exploder.Explode(transform.position);
         }
 
         Destroy(gameObject);
-    }
-
-    public void AddExplosion(float baseForce, Vector3 center, float baseRadius)
-    {
-        float upwardsModifier = 0.1f;
-
-        int forceMultiplier = 3;
-
-        float sizeFactor = 1f / transform.localScale.magnitude;
-        float adjustedForce = baseForce * sizeFactor * forceMultiplier;
-        float adjustedRadius = baseRadius * sizeFactor * forceMultiplier;
-
-        Rigidbody.AddExplosionForce(adjustedForce, center, adjustedRadius, upwardsModifier, ForceMode.Impulse);
-    }
-
-    public void Init(Vector3 scale, Cube sourceCube)
-    {
-        ChangeScale(scale);
-        _colorChanger.ChangeColor(sourceCube.GetComponent<MeshRenderer>());
-        UpdateSplitChance(sourceCube._currentSplitChance);
-    }
-
-    private void ChangeScale(Vector3 scale)
-    {
-        transform.localScale = scale;
     }
 
     private void UpdateSplitChance(float splitChance)
